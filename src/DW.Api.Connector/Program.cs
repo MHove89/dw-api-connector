@@ -2,6 +2,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
+using DW.Api.Connector.Commands.Pages;
 using DW.Api.Connector.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -31,7 +32,7 @@ class Program
     private static CommandLineBuilder BuildCommandLine()
     {
         var root = new RootCommand();
-
+        root.AddCommand(PagesCommands.BuildCommands());
         root.AddGlobalOption(VerboseLogging);
 
         return new CommandLineBuilder(root);
