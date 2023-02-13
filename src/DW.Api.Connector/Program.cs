@@ -1,45 +1,39 @@
-﻿using DW.Api.Connector.Clients;
+﻿using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Hosting;
+using System.CommandLine.Parsing;
+using DW.Api.Connector.Extensions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace DW.Api.Connector;
 
 class Program
 {
-    static void Main(string[] args)
+    private static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args);
+    private static readonly Option<bool> VerboseLogging = new(new[] { "--verbose", "-v" }, "verbose");
+
+    public static async Task<int> Main(string[] args)
     {
-        var host = Host.CreateDefaultBuilder(args)
-            .ConfigureServices((hostContext, services) =>
-            {
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false);
-
-                var dwApiConnectorSettings = GetAppSettings(services);
-                services.AddSingleton(dwApiConnectorSettings);
-
-                if (!string.IsNullOrEmpty(dwApiConnectorSettings.BaseAddress))
-                {
-                    services.AddHttpClient<IDWApiClient, DWApiClient>((client) => { client.BaseAddress = new Uri(dwApiConnectorSettings.BaseAddress); });
-                }
-
-                services.AddHostedService<Startup>();
-            });
-
-        host.Start();
-    }
-
-    private static DWAPIConnectorSettings GetAppSettings(IServiceCollection services)
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", false, true)
+        var runner = BuildCommandLine()
+            .UseHost(_ => CreateHostBuilder(args), (builder) => builder
+                .ConfigureAppConfiguration((context, configuration) => { configuration.AddJsonFile($"appsettings.local.json", optional: true); })
+                .ConfigureServices((_, services) => { services.AddApplication(); })
+                .UseSerilog((context, loggerConfiguration) => loggerConfiguration.ConfigureSerilog(context, VerboseLogging))
+                .UseCommands())
+            .UseDefaults()
             .Build();
 
-        var dwApiConnectorSettings = new DWAPIConnectorSettings();
-        config.Bind("DWAPIConnector", dwApiConnectorSettings);
+        return await runner.InvokeAsync(args);
+    }
 
-        return dwApiConnectorSettings;
+    private static CommandLineBuilder BuildCommandLine()
+    {
+        var root = new RootCommand();
+
+        root.AddGlobalOption(VerboseLogging);
+
+        return new CommandLineBuilder(root);
     }
 }

@@ -12,11 +12,11 @@ public class Startup : BackgroundService
     public Startup(
         ILogger<Startup> logger,
         IHost host,
-        DWAPIConnectorSettings dwAPIConnectorSettings)
+        DWAPIConnectorSettings dwApiConnectorSettings)
     {
         _logger = logger;
         _host = host;
-        _dwApiConnectorSettings = dwAPIConnectorSettings;
+        _dwApiConnectorSettings = dwApiConnectorSettings;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
