@@ -1,6 +1,8 @@
 using System.CommandLine;
 using System.CommandLine.Hosting;
 using System.Reflection;
+using DW.Api.Connector.Configuration;
+using DW.Api.Connector.Services;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +37,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddSingleton(GetSettings(services));
+        services.AddTransient<IDWClient, DWClient>();
+        services.AddSingleton<GlobalOptions>();
+        services.AddTransient<IOutputService, OutputService>();
+
         return services;
     }
 

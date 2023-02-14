@@ -5,30 +5,34 @@ using RestSharp;
 
 namespace DW.Api.Connector.Api.Pages;
 
-public class GetPagesRequest : IRequest<GetPagesResponse>
+public class GetPagesRequest : IRequest<GetPagesResponse[]>
+{
+    public int AreaId { get; set; }
+    public string? ItemType { get; set; }
+}
+
+public class GetPagesResponse : Page
 {
 }
 
-public class GetPagesResponse
-{
-    public IEnumerable<Page>? Pages { get; set; }
-}
-
-public class GetEnvironmentsRequestHandler : IRequestHandler<GetPagesRequest, GetPagesResponse>
+public class GetPagesRequestHandler : IRequestHandler<GetPagesRequest, GetPagesResponse[]>
 {
     private readonly IDWClient _client;
 
-    public GetEnvironmentsRequestHandler(IDWClient client)
+    public GetPagesRequestHandler(IDWClient client)
     {
         _client = client;
     }
 
-    public async Task<GetPagesResponse> Handle(GetPagesRequest getPagesRequest, CancellationToken cancellationToken)
+    public async Task<GetPagesResponse[]> Handle(GetPagesRequest getPagesRequest, CancellationToken cancellationToken)
     {
-        var request = new RestRequest("tenant/environments")
+        var request = new RestRequest("/dwapi/content/pages")
             .AddJsonBody(getPagesRequest);
 
-        var response = await _client.ExecuteAsync<GetPagesResponse>(request, cancellationToken);
+        request.Parameters.AddParameter(new QueryParameter("AreaId", getPagesRequest.AreaId.ToString()));
+        request.Parameters.AddParameter(new QueryParameter("ItemType", getPagesRequest.ItemType));
+
+        var response = await _client.ExecuteAsync<GetPagesResponse[]>(request, cancellationToken);
         return response;
     }
 }
