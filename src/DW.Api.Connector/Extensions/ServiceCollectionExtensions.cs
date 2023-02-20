@@ -8,7 +8,6 @@ using Enterspeed.Source.Sdk.Api.Providers;
 using Enterspeed.Source.Sdk.Api.Services;
 using Enterspeed.Source.Sdk.Domain.Services;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -40,8 +39,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddMediatR(Assembly.GetExecutingAssembly());
-        services.AddSingleton(GetSettings(services));
-        services.AddTransient<IDWClient, DWClient>();
         services.AddSingleton<GlobalOptions>();
         services.AddTransient<IOutputService, OutputService>();
         services.AddSingleton<IEnterspeedIngestService, EnterspeedIngestService>();
@@ -60,17 +57,5 @@ public static class ServiceCollectionExtensions
             });
 
         return services;
-    }
-
-    private static DWAPIConnectorSettings GetSettings(IServiceCollection services)
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", false, true)
-            .Build();
-
-        var dwApiConnectorSettings = new DWAPIConnectorSettings();
-        config.Bind("DWAPIConnector", dwApiConnectorSettings);
-        return dwApiConnectorSettings;
     }
 }
