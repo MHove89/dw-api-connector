@@ -34,11 +34,8 @@ public class Page
     [JsonPropertyName("Languages")]
     public List<Language>? Languages { get; set; }
 
-    [JsonPropertyName("Link")]
-    public string? Link { get; set; }
-
     [JsonPropertyName("Item")]
-    public object Item { get; set; }
+    public Item Item { get; set; }
 
     [JsonPropertyName("paragraphs")]
     public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();

@@ -4,10 +4,14 @@ using System.Reflection;
 using DW.Api.Connector.Configuration;
 using DW.Api.Connector.Providers;
 using DW.Api.Connector.Services;
+using Enterspeed.Source.Sdk.Api.Connection;
 using Enterspeed.Source.Sdk.Api.Providers;
 using Enterspeed.Source.Sdk.Api.Services;
+using Enterspeed.Source.Sdk.Domain.Connection;
 using Enterspeed.Source.Sdk.Domain.Services;
+using Enterspeed.Source.Sdk.Domain.SystemTextJson;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -44,6 +48,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEnterspeedIngestService, EnterspeedIngestService>();
         services.AddSingleton<IEnterspeedConfigurationProvider, EnterspeedDWConfigurationProvider>();
         services.AddSingleton<IEnterspeedConfigurationService, EnterspeedConfigurationService>();
+        services.AddSingleton<IEnterspeedConnection, EnterspeedConnection>();
+        services.AddSingleton<IJsonSerializer, SystemTextJsonSerializer>();
+        services.AddSingleton(GetSettings(services));
+        services.AddTransient<IDWClient, DWClient>();
 
         services.AddSingleton<IEnterspeedConnectionProvider>(
             c =>
@@ -58,4 +66,17 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+    
+    private static DWAPIConnectorSettings GetSettings(IServiceCollection services)
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", false, true)
+            .Build();
+
+        var dwApiConnectorSettings = new DWAPIConnectorSettings();
+        config.Bind("DWAPIConnector", dwApiConnectorSettings);
+        return dwApiConnectorSettings;
+    }
+
 }

@@ -14,7 +14,6 @@ public class EnterspeedConfigurationService : IEnterspeedConfigurationService
 
     [Obsolete("Use separate configuration keys instead.", false)]
     private readonly string _configurationDatabaseKey = "Enterspeed+Configuration";
-
     private readonly string _configurationMediaDomainDatabaseKey = "Enterspeed+Configuration+MediaDomain";
     private readonly string _configurationApiKeyDatabaseKey = "Enterspeed+Configuration+ApiKey";
     private readonly string _configurationPreviewApiKeyDatabaseKey = "Enterspeed+Configuration+PreviewApiKey";

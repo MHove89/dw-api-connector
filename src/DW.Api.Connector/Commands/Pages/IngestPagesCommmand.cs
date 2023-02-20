@@ -39,12 +39,12 @@ public class IngestPagesCommmand : Command
         {
             var pages = await GetPages();
             await AddParagraphsToPages(pages);
-            
+
             foreach (var page in pages)
             {
-                _enterspeedIngestService.Save(new DWContentEntity(page, "fdsa"));
+                var response = _enterspeedIngestService.Save(new DWContentEntity(page, "fdsa"));
             }
-            
+
             return 0;
         }
 
