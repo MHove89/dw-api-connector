@@ -2,7 +2,11 @@ using System.CommandLine;
 using System.CommandLine.Hosting;
 using System.Reflection;
 using DW.Api.Connector.Configuration;
+using DW.Api.Connector.Providers;
 using DW.Api.Connector.Services;
+using Enterspeed.Source.Sdk.Api.Providers;
+using Enterspeed.Source.Sdk.Api.Services;
+using Enterspeed.Source.Sdk.Domain.Services;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +44,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IDWClient, DWClient>();
         services.AddSingleton<GlobalOptions>();
         services.AddTransient<IOutputService, OutputService>();
+        services.AddSingleton<IEnterspeedIngestService, EnterspeedIngestService>();
+        services.AddSingleton<IEnterspeedConfigurationProvider, EnterspeedDWConfigurationProvider>();
+        services.AddSingleton<IEnterspeedConfigurationService, EnterspeedConfigurationService>();
+
+        services.AddSingleton<IEnterspeedConnectionProvider>(
+            c =>
+            {
+                var configurationProvider = c.GetService<IEnterspeedConfigurationProvider>();
+                var configurationService = c.GetService<IEnterspeedConfigurationService>();
+
+                var connectionProvider = new EnterspeedConnectionProvider(configurationService, configurationProvider);
+
+                return connectionProvider;
+            });
 
         return services;
     }
