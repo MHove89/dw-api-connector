@@ -1,15 +1,18 @@
+using DW.Api.Connector.Services;
 using Enterspeed.Source.Sdk.Api.Models;
 using Enterspeed.Source.Sdk.Api.Models.Properties;
 
 namespace DW.Api.Connector.Models.Enterspeed;
 
-public class DWContentEntity : IEnterspeedEntity
+public class DWContentEnterspeedEntity : IEnterspeedEntity
 {
     private readonly Page _page;
 
-    public DWContentEntity(Page page, string pageType)
+    public DWContentEnterspeedEntity(Page page,
+        IEnterspeedPropertyService propertyService)
     {
         _page = page;
+        Properties = propertyService.ConvertProperties(page.Item.Fields);
     }
 
     public string Id => _page.ID.ToString();

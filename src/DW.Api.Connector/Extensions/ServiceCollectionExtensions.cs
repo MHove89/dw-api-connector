@@ -50,6 +50,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEnterspeedConfigurationService, EnterspeedConfigurationService>();
         services.AddSingleton<IEnterspeedConnection, EnterspeedConnection>();
         services.AddSingleton<IJsonSerializer, SystemTextJsonSerializer>();
+        services.AddTransient<IEnterspeedPropertyService, EnterspeedPropertyService>();
         services.AddSingleton(GetSettings(services));
         services.AddTransient<IDWClient, DWClient>();
 
@@ -66,7 +67,7 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-    
+
     private static DWAPIConnectorSettings GetSettings(IServiceCollection services)
     {
         var config = new ConfigurationBuilder()
@@ -78,5 +79,4 @@ public static class ServiceCollectionExtensions
         config.Bind("DWAPIConnector", dwApiConnectorSettings);
         return dwApiConnectorSettings;
     }
-
 }
