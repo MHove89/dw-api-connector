@@ -8,7 +8,8 @@ public class DWContentEnterspeedEntity : IEnterspeedEntity
 {
     private readonly Page _page;
 
-    public DWContentEnterspeedEntity(Page page,
+    public DWContentEnterspeedEntity(
+        Page page,
         IEnterspeedPropertyService propertyService)
     {
         _page = page;
