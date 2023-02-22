@@ -23,10 +23,10 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
     {
         var metaData = new Dictionary<string, IEnterspeedProperty>
         {
-            ["name"] = new StringEnterspeedProperty("name", page.Name),
+            ["name"] = new StringEnterspeedProperty("name", paragraph.Name),
             ["culture"] = new StringEnterspeedProperty("culture", culture),
-            ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
-            ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
+            ["createDate"] = new StringEnterspeedProperty("createDate", paragraph.CreatedDate.ToEnterspeedFormatString()),
+            ["updateDate"] = new StringEnterspeedProperty("updateDate", paragraph.UpdatedDate.ToEnterspeedFormatString()),
         };
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
@@ -39,29 +39,42 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
         {
             foreach (var field in page.Item.Fields)
             {
-                var fieldEnterspeedProperties = new Dictionary<string, IEnterspeedProperty>();
                 var jsonElement = JsonSerializer.SerializeToElement(field);
                 var properties = jsonElement.EnumerateObject();
-
-                fieldEnterspeedProperties.Add("name", new StringEnterspeedProperty(field.Name));
-                fieldEnterspeedProperties.Add("systemName", new StringEnterspeedProperty(field.SystemName));
-
                 var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
-                fieldEnterspeedProperties.Add("value", ResolveProperty(valueProperty));
 
-                output.Add(field.SystemName, new ObjectEnterspeedProperty(fieldEnterspeedProperties));
+                output.Add(field.SystemName, ResolveProperty(valueProperty));
             }
         }
 
         if (page.Paragraphs != null)
         {
+            var paragraphItems = new List<IEnterspeedProperty>();
+
             foreach (var paragraph in page.Paragraphs)
             {
-                var paragraphEnterspeedProperties = new Dictionary<string, IEnterspeedProperty>();
+                var paragraphItem = new Dictionary<string, IEnterspeedProperty>();
 
                 var metaProperties = CreateMetaData(paragraph, "");
-                paragraphEnterspeedProperties.Add("meta", metaProperties);
+                paragraphItem.Add("meta", metaProperties);
+
+                if (paragraph.Item != null)
+                {
+                    foreach (var field in paragraph.Item.Fields)
+                    {
+                        var jsonElement = JsonSerializer.SerializeToElement(field);
+                        var properties = jsonElement.EnumerateObject();
+
+                        var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
+                    
+                        paragraphItem.Add(field.SystemName, ResolveProperty(valueProperty));
+                    }
+                }
+
+                paragraphItems.Add(new ObjectEnterspeedProperty(paragraphItem));
             }
+
+            output.Add("paragraphs", new ArrayEnterspeedProperty("paragraphs", paragraphItems.ToArray()));
         }
 
         return output;
@@ -75,18 +88,18 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                 break;
 
             case JsonValueKind.Object:
-                var fieldEnterspeedProperties = new Dictionary<string, IEnterspeedProperty>();
+                var fieldProperties = new Dictionary<string, IEnterspeedProperty>();
                 var objectProperties = jsonProperty.Value.EnumerateObject();
                 foreach (var objectProperty in objectProperties)
                 {
-                    fieldEnterspeedProperties.Add(objectProperty.Name, ResolveProperty(objectProperty));
+                    fieldProperties.Add(objectProperty.Name, ResolveProperty(objectProperty));
                 }
 
-                return new ObjectEnterspeedProperty(fieldEnterspeedProperties);
+                return new ObjectEnterspeedProperty(fieldProperties);
 
             case JsonValueKind.Array:
                 var objectArray = jsonProperty.Value.EnumerateArray();
-                var enterspeedProperties = new List<IEnterspeedProperty>();
+                var properties = new List<IEnterspeedProperty>();
 
                 foreach (var jsonElement in objectArray)
                 {
@@ -104,20 +117,20 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                                 objectFieldProperties.Add(arrayObjectProperty.Name, ResolveProperty(arrayObjectProperty));
                             }
 
-                            enterspeedProperties.Add(new ObjectEnterspeedProperty(objectFieldProperties));
+                            properties.Add(new ObjectEnterspeedProperty(objectFieldProperties));
                             break;
 
                         case JsonValueKind.String:
-                            enterspeedProperties.Add(new StringEnterspeedProperty(jsonElement.GetString()));
+                            properties.Add(new StringEnterspeedProperty(jsonElement.GetString()));
                             break;
 
                         case JsonValueKind.Number:
-                            enterspeedProperties.Add(new NumberEnterspeedProperty(jsonElement.GetDouble()));
+                            properties.Add(new NumberEnterspeedProperty(jsonElement.GetDouble()));
                             break;
 
                         case JsonValueKind.True:
                         case JsonValueKind.False:
-                            enterspeedProperties.Add(new BooleanEnterspeedProperty(jsonElement.GetBoolean()));
+                            properties.Add(new BooleanEnterspeedProperty(jsonElement.GetBoolean()));
                             break;
 
                         case JsonValueKind.Null:
@@ -128,7 +141,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                     }
                 }
 
-                return new ArrayEnterspeedProperty(jsonProperty.Name, enterspeedProperties.ToArray());
+                return new ArrayEnterspeedProperty(jsonProperty.Name, properties.ToArray());
 
             case JsonValueKind.String:
                 return new StringEnterspeedProperty(jsonProperty.Value.ToString());

@@ -35,7 +35,7 @@ public class Page
     public List<Language>? Languages { get; set; }
 
     [JsonPropertyName("Item")]
-    public Item Item { get; set; }
+    public Item Item { get; set; }  
 
     [JsonPropertyName("paragraphs")]
     public List<Paragraph>? Paragraphs { get; set; }

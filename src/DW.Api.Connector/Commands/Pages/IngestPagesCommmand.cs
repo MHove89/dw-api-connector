@@ -47,9 +47,10 @@ public class IngestPagesCommmand : Command
         public async Task<int> InvokeAsync(InvocationContext context)
         {
             var pages = await GetPages();
-            await AddParagraphsToPages(pages);
+            var castedPages = pages.Cast<Page>().ToList();
+            await AddParagraphsToPages(castedPages);
 
-            foreach (var page in pages)
+            foreach (var page in castedPages)
             {
                 var dwEntity = new DWContentEnterspeedEntity(page, _enterspeedPropertyService);
                 var response = _enterspeedIngestService.Save(dwEntity);
@@ -73,7 +74,7 @@ public class IngestPagesCommmand : Command
             return pages;
         }
 
-        private async Task AddParagraphsToPages(GetPagesResponse[] pages)
+        private async Task AddParagraphsToPages(List<Page> pages)
         {
             foreach (var page in pages)
             {
@@ -82,8 +83,15 @@ public class IngestPagesCommmand : Command
                     AreaId = page.AreaID,
                     PageId = page.ID
                 });
+              
+                var paragraphList = new List<Paragraph>();
+                foreach (var paragraphResponse in paragraphs)
+                {
+                    var paragraph = paragraphResponse as Paragraph;
+                    paragraphList.Add(paragraphResponse);
+                }
 
-                page.Paragraphs.AddRange(paragraphs);
+                page.Paragraphs = paragraphList;
             }
         }
     }
