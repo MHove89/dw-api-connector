@@ -7,7 +7,7 @@ namespace DW.Api.Connector.Services;
 
 public class EnterspeedPropertyService : IEnterspeedPropertyService
 {
-    public IEnterspeedProperty CreateNodeMetaData(Page page, string culture)
+    public IEnterspeedProperty CreateMetaData(Page page, string culture)
     {
         var metaData = new Dictionary<string, IEnterspeedProperty>
         {
@@ -19,13 +19,25 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
-    public IDictionary<string, IEnterspeedProperty> ConvertProperties(List<Field>? fields)
+    public IEnterspeedProperty CreateMetaData(Paragraph paragraph, string culture)
+    {
+        var metaData = new Dictionary<string, IEnterspeedProperty>
+        {
+            ["name"] = new StringEnterspeedProperty("name", page.Name),
+            ["culture"] = new StringEnterspeedProperty("culture", culture),
+            ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
+            ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
+        };
+        return new ObjectEnterspeedProperty("metaData", metaData);
+    }
+
+    public IDictionary<string, IEnterspeedProperty> ConvertProperties(Page page)
     {
         var output = new Dictionary<string, IEnterspeedProperty>();
 
-        if (fields != null)
+        if (page.Item?.Fields != null)
         {
-            foreach (var field in fields)
+            foreach (var field in page.Item.Fields)
             {
                 var fieldEnterspeedProperties = new Dictionary<string, IEnterspeedProperty>();
                 var jsonElement = JsonSerializer.SerializeToElement(field);
@@ -38,6 +50,17 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                 fieldEnterspeedProperties.Add("value", ResolveProperty(valueProperty));
 
                 output.Add(field.SystemName, new ObjectEnterspeedProperty(fieldEnterspeedProperties));
+            }
+        }
+
+        if (page.Paragraphs != null)
+        {
+            foreach (var paragraph in page.Paragraphs)
+            {
+                var paragraphEnterspeedProperties = new Dictionary<string, IEnterspeedProperty>();
+
+                var metaProperties = CreateMetaData(paragraph, "");
+                paragraphEnterspeedProperties.Add("meta", metaProperties);
             }
         }
 

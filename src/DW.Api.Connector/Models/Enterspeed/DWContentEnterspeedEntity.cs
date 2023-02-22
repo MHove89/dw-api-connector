@@ -13,7 +13,7 @@ public class DWContentEnterspeedEntity : IEnterspeedEntity
         IEnterspeedPropertyService propertyService)
     {
         _page = page;
-        Properties = propertyService.ConvertProperties(page.Item.Fields);
+        Properties = propertyService.ConvertProperties(page);
     }
 
     public string Id => _page.ID.ToString();

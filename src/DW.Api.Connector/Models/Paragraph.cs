@@ -53,5 +53,5 @@ public class Paragraph
     public string? ImageCaption { get; set; }
 
     [JsonPropertyName("Item")]
-    public object? Item { get; set; }
+    public Item? Item { get; set; }
 }

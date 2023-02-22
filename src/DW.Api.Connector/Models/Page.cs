@@ -38,5 +38,5 @@ public class Page
     public Item Item { get; set; }
 
     [JsonPropertyName("paragraphs")]
-    public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
+    public List<Paragraph>? Paragraphs { get; set; }
 }
