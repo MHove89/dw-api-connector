@@ -1,4 +1,6 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Web;
 using DW.Api.Connector.Extensions;
 using DW.Api.Connector.Models;
 using Enterspeed.Source.Sdk.Api.Models.Properties;
@@ -41,9 +43,11 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             {
                 var jsonElement = JsonSerializer.SerializeToElement(field);
                 var properties = jsonElement.EnumerateObject();
-                var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
-
-                output.Add(field.SystemName, ResolveProperty(valueProperty));
+                if (!field.SystemName.Equals("Options"))
+                {
+                    var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
+                    output.Add(field.SystemName, ResolveProperty(valueProperty));
+                }
             }
         }
 
@@ -66,7 +70,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                         var properties = jsonElement.EnumerateObject();
 
                         var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
-                    
+
                         paragraphItem.Add(field.SystemName, ResolveProperty(valueProperty));
                     }
                 }
@@ -82,6 +86,9 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
 
     public IEnterspeedProperty ResolveProperty(JsonProperty jsonProperty)
     {
+        if (jsonProperty.Name.Equals("Options"))
+            return new StringEnterspeedProperty("");
+
         switch (jsonProperty.Value.ValueKind)
         {
             case JsonValueKind.Undefined:
@@ -100,7 +107,6 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             case JsonValueKind.Array:
                 var objectArray = jsonProperty.Value.EnumerateArray();
                 var properties = new List<IEnterspeedProperty>();
-
                 foreach (var jsonElement in objectArray)
                 {
                     switch (jsonElement.ValueKind)
@@ -121,7 +127,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                             break;
 
                         case JsonValueKind.String:
-                            properties.Add(new StringEnterspeedProperty(jsonElement.GetString()));
+                            properties.Add(new StringEnterspeedProperty(HttpUtility.HtmlDecode(jsonElement.GetString())));
                             break;
 
                         case JsonValueKind.Number:
@@ -144,10 +150,10 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                 return new ArrayEnterspeedProperty(jsonProperty.Name, properties.ToArray());
 
             case JsonValueKind.String:
-                return new StringEnterspeedProperty(jsonProperty.Value.ToString());
+                return new StringEnterspeedProperty(HttpUtility.HtmlDecode(jsonProperty.Value.ToString()));
 
             case JsonValueKind.Number:
-                return new NumberEnterspeedProperty(double.Parse(jsonProperty.Value.ToString() ?? string.Empty));
+                return new NumberEnterspeedProperty(double.Parse(jsonProperty.Value.ToString()));
 
             case JsonValueKind.True:
             case JsonValueKind.False:
