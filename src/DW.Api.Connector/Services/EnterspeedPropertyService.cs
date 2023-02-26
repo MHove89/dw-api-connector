@@ -3,7 +3,6 @@ using System.Web;
 using DW.Api.Connector.Extensions;
 using DW.Api.Connector.Models;
 using Enterspeed.Source.Sdk.Api.Models.Properties;
-using Microsoft.Extensions.Configuration;
 
 namespace DW.Api.Connector.Services;
 
@@ -18,6 +17,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
         };
+       
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
@@ -30,6 +30,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", paragraph.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", paragraph.UpdatedDate.ToEnterspeedFormatString()),
         };
+        
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
