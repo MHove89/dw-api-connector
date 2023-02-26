@@ -8,6 +8,7 @@ using DW.Api.Connector.Models.Enterspeed;
 using DW.Api.Connector.Services;
 using Enterspeed.Source.Sdk.Api.Services;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DW.Api.Connector.Commands.Pages;
@@ -28,6 +29,9 @@ public class IngestPagesCommmand : Command
         private readonly IEnterspeedIngestService _enterspeedIngestService;
         private readonly IEnterspeedPropertyService _enterspeedPropertyService;
         private readonly ILogger<Handler> _logger;
+        private readonly IConfiguration _configuration;
+
+
         public int AreaId { get; set; }
         public string? ItemType { get; set; }
         public string Culture { get; set; }
@@ -36,17 +40,20 @@ public class IngestPagesCommmand : Command
             IOutputService outputService,
             IEnterspeedIngestService enterspeedIngestService,
             ILogger<Handler> logger,
-            IEnterspeedPropertyService enterspeedPropertyService)
+            IEnterspeedPropertyService enterspeedPropertyService,
+            IConfiguration configuration)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _outputService = outputService;
             _enterspeedIngestService = enterspeedIngestService;
             _logger = logger;
             _enterspeedPropertyService = enterspeedPropertyService;
+            _configuration = configuration;
         }
 
         public async Task<int> InvokeAsync(InvocationContext context)
         {
+            var websiteDomain = _configuration["Enterspeed:WebsiteDomain"];
             var pages = await GetPages();
             var castedPages = pages.Cast<Page>().ToList();
             await AddParagraphsToPages(castedPages);
@@ -54,7 +61,8 @@ public class IngestPagesCommmand : Command
             foreach (var page in castedPages)
             {
                 page.Culture = Culture;
-                var dwEntity = new DWContentEnterspeedEntity(page, _enterspeedPropertyService);
+
+                var dwEntity = new DWContentEnterspeedEntity(page, _enterspeedPropertyService, websiteDomain ?? "");
                 var response = _enterspeedIngestService.Save(dwEntity);
                 if (!response.Success)
                 {

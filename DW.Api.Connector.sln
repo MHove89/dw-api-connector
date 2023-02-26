@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DW.Api.Connector", "..\src\DW.Api.Connector\DW.Api.Connector.csproj", "{E3268D42-15F2-48B2-AB68-7B584A38B4C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DW.Api.Connector", ".\src\DW.Api.Connector\DW.Api.Connector.csproj", "{E3268D42-15F2-48B2-AB68-7B584A38B4C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -28,7 +28,7 @@
     <ItemGroup>
         <None Remove="appsettings.json" />
         <AdditionalFiles Include="appsettings.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </AdditionalFiles>
     </ItemGroup>
 
