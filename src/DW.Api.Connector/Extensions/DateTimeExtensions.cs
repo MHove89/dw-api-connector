@@ -1,5 +1,3 @@
-using Enterspeed.Source.Sdk.Api.Models.Properties;
-
 namespace DW.Api.Connector.Extensions;
 
 public static class DateTimeExtensions

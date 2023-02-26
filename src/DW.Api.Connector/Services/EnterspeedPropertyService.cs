@@ -1,4 +1,3 @@
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Web;
 using DW.Api.Connector.Extensions;
@@ -9,12 +8,12 @@ namespace DW.Api.Connector.Services;
 
 public class EnterspeedPropertyService : IEnterspeedPropertyService
 {
-    public IEnterspeedProperty CreateMetaData(Page page, string culture)
+    public IEnterspeedProperty CreateMetaData(Page page)
     {
         var metaData = new Dictionary<string, IEnterspeedProperty>
         {
             ["name"] = new StringEnterspeedProperty("name", page.Name),
-            ["culture"] = new StringEnterspeedProperty("culture", culture),
+            ["culture"] = new StringEnterspeedProperty("culture", page.Culture),
             ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
         };
@@ -36,6 +35,9 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
     public IDictionary<string, IEnterspeedProperty> ConvertProperties(Page page)
     {
         var output = new Dictionary<string, IEnterspeedProperty>();
+        var metaData = CreateMetaData(page);
+     
+        output.Add("metaData", metaData);
 
         if (page.Item?.Fields != null)
         {
@@ -59,7 +61,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             {
                 var paragraphItem = new Dictionary<string, IEnterspeedProperty>();
 
-                var metaProperties = CreateMetaData(paragraph, "");
+                var metaProperties = CreateMetaData(paragraph, page.Culture);
                 paragraphItem.Add("meta", metaProperties);
 
                 if (paragraph.Item != null)

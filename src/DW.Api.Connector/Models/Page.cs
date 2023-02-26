@@ -7,6 +7,9 @@ public class Page
     [JsonPropertyName("ID")]
     public int ID { get; set; }
 
+    [JsonPropertyName("culture")]
+    public string Culture { get; set; }
+
     [JsonPropertyName("Name")]
     public string? Name { get; set; }
 
@@ -35,7 +38,7 @@ public class Page
     public List<Language>? Languages { get; set; }
 
     [JsonPropertyName("Item")]
-    public Item Item { get; set; }  
+    public Item Item { get; set; }
 
     [JsonPropertyName("paragraphs")]
     public List<Paragraph>? Paragraphs { get; set; }

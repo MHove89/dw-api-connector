@@ -16,7 +16,7 @@ public class DWContentEnterspeedEntity : IEnterspeedEntity
         Properties = propertyService.ConvertProperties(page);
     }
 
-    public string Id => _page.ID.ToString();
+    public string Id => _page.ID + "-" + _page.Culture;
     public string Type => _page.Item.SystemName;
     public string Url => !string.IsNullOrEmpty(_page.Item.Link) ? _page.Item.Link : "";
     public string[] Redirects { get; }

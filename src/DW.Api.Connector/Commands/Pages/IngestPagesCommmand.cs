@@ -18,6 +18,7 @@ public class IngestPagesCommmand : Command
     {
         AddArgument(new Argument<int>("areaId", "Id of parent page") { Arity = ArgumentArity.ExactlyOne });
         AddArgument(new Argument<string>("itemType", "Id of parent page") { Arity = ArgumentArity.ExactlyOne });
+        AddArgument(new Argument<string>("culture", "Language Culture") { Arity = ArgumentArity.ExactlyOne });
     }
 
     public new class Handler : BaseCommandHandler, ICommandHandler
@@ -29,7 +30,7 @@ public class IngestPagesCommmand : Command
         private readonly ILogger<Handler> _logger;
         public int AreaId { get; set; }
         public string? ItemType { get; set; }
-
+        public string Culture { get; set; }
 
         public Handler(IMediator mediator,
             IOutputService outputService,
@@ -52,6 +53,7 @@ public class IngestPagesCommmand : Command
 
             foreach (var page in castedPages)
             {
+                page.Culture = Culture;
                 var dwEntity = new DWContentEnterspeedEntity(page, _enterspeedPropertyService);
                 var response = _enterspeedIngestService.Save(dwEntity);
                 if (!response.Success)
@@ -66,12 +68,37 @@ public class IngestPagesCommmand : Command
 
         private async Task<GetPagesResponse[]> GetPages()
         {
-            var pages = await _mediator.Send(new GetPagesRequest()
+            var itemTypes = new List<string>();
+            var response = new List<GetPagesResponse>();
+
+            if (ItemType != null && ItemType.Contains(','))
             {
-                AreaId = AreaId,
-                ItemType = ItemType
-            });
-            return pages;
+                var itemTypesSplitted = ItemType.Replace(" ", "").Split(',');
+                foreach (var itemType in itemTypesSplitted)
+                {
+                    itemTypes.Add(itemType);
+                }
+            }
+            else if (!string.IsNullOrEmpty(ItemType))
+            {
+                itemTypes.Add(ItemType);
+            }
+
+            foreach (var itemType in itemTypes)
+            {
+                var pages = await _mediator.Send(new GetPagesRequest()
+                {
+                    AreaId = AreaId,
+                    ItemType = itemType
+                });
+
+                if (pages != null)
+                {
+                    response.AddRange(pages);
+                }
+            }
+
+            return response.ToArray();
         }
 
         private async Task AddParagraphsToPages(List<Page> pages)
@@ -83,7 +110,7 @@ public class IngestPagesCommmand : Command
                     AreaId = page.AreaID,
                     PageId = page.ID
                 });
-              
+
                 var paragraphList = new List<Paragraph>();
                 foreach (var paragraphResponse in paragraphs)
                 {

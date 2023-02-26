@@ -5,7 +5,7 @@ using RestSharp;
 
 namespace DW.Api.Connector.Api.Pages;
 
-public class GetPagesRequest : IRequest<GetPagesResponse[]>
+public class GetPagesRequest : IRequest<GetPagesResponse[]?>
 {
     public int AreaId { get; set; }
     public string? ItemType { get; set; }

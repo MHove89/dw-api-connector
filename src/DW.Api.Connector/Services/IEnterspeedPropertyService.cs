@@ -5,6 +5,6 @@ namespace DW.Api.Connector.Services;
 
 public interface IEnterspeedPropertyService
 {
-    IEnterspeedProperty CreateMetaData(Page page, string culture);
+    IEnterspeedProperty CreateMetaData(Page page);
     IDictionary<string, IEnterspeedProperty> ConvertProperties(Page page);
 }
