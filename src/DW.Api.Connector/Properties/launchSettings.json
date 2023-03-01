@@ -5,7 +5,7 @@
       "commandName": "Project",
       "environmentVariables": {
       },
-      "commandLineArgs": "pages ingestPages 32 Digital_Horisont___Artikel,Nyhed da-DK"
+      "commandLineArgs": "pages ingestPages 32 Nyheder da-DK"
     }
   }
 }
