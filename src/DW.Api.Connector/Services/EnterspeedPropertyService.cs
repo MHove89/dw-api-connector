@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Web;
 using DW.Api.Connector.Extensions;
 using DW.Api.Connector.Models;
@@ -17,7 +18,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
         };
-       
+
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
@@ -30,7 +31,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", paragraph.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", paragraph.UpdatedDate.ToEnterspeedFormatString()),
         };
-        
+
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
@@ -38,7 +39,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
     {
         var output = new Dictionary<string, IEnterspeedProperty>();
         var metaData = CreateMetaData(page);
-     
+
         output.Add("metaData", metaData);
 
         if (page.Item?.Fields != null)
@@ -50,7 +51,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                 if (!field.SystemName.Equals("Options"))
                 {
                     var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
-                    output.Add(field.SystemName, ResolveProperty(valueProperty));
+                    output.Add(field.SystemName, ResolveProperty(valueProperty, field.Name));
                 }
             }
         }
@@ -75,7 +76,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
 
                         var valueProperty = properties.FirstOrDefault(p => p.Name == "Value");
 
-                        paragraphItem.Add(field.SystemName, ResolveProperty(valueProperty));
+                        paragraphItem.Add(field.SystemName, ResolveProperty(valueProperty, field.Name));
                     }
                 }
 
@@ -88,8 +89,9 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
         return output;
     }
 
-    public IEnterspeedProperty ResolveProperty(JsonProperty jsonProperty)
+    public IEnterspeedProperty ResolveProperty(JsonProperty jsonProperty, string properyAlias)
     {
+
         if (jsonProperty.Name.Equals("Options"))
             return new StringEnterspeedProperty("");
 
@@ -103,7 +105,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
                 var objectProperties = jsonProperty.Value.EnumerateObject();
                 foreach (var objectProperty in objectProperties)
                 {
-                    fieldProperties.Add(objectProperty.Name, ResolveProperty(objectProperty));
+                    fieldProperties.Add(objectProperty.Name, ResolveProperty(objectProperty, properyAlias));
                 }
 
                 return new ObjectEnterspeedProperty(fieldProperties);
@@ -124,14 +126,28 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
 
                             foreach (var arrayObjectProperty in arrayObjectProperties)
                             {
-                                objectFieldProperties.Add(arrayObjectProperty.Name, ResolveProperty(arrayObjectProperty));
+                                objectFieldProperties.Add(arrayObjectProperty.Name, ResolveProperty(arrayObjectProperty, properyAlias));
                             }
 
                             properties.Add(new ObjectEnterspeedProperty(objectFieldProperties));
                             break;
 
                         case JsonValueKind.String:
-                            properties.Add(new StringEnterspeedProperty(HttpUtility.HtmlDecode(jsonElement.GetString())));
+                            if (jsonProperty.Name == "SelectedNames" && properyAlias == "Tags")
+                            {
+                                var stringJsonElement = jsonElement.GetString();
+                                string pattern = @"\((\d+)\)";
+                                var replacement = "";
+                                if (stringJsonElement != null)
+                                {
+                                    var result = Regex.Replace(stringJsonElement, pattern, replacement);
+                                    properties.Add(new StringEnterspeedProperty(HttpUtility.HtmlDecode(result?.TrimEnd())));
+                                }
+                            }
+                            else
+                            {
+                                properties.Add(new StringEnterspeedProperty(HttpUtility.HtmlDecode(jsonElement.GetString())));
+                            }
                             break;
 
                         case JsonValueKind.Number:
