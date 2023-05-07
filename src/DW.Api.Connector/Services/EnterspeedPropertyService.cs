@@ -19,7 +19,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
         };
 
         
-        MapAdditionalMediaProperties(metaData, page, page.Culture);
+        MapAdditionalMetaProperties(metaData, page, page.Culture);
 
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
@@ -183,7 +183,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
     /// <param name="data"></param>
     /// <param name="page"></param>
     /// <param name="culture"></param>
-    protected virtual void MapAdditionalMediaProperties(Dictionary<string, IEnterspeedProperty> data, Page page, string culture)
+    protected virtual void MapAdditionalMetaProperties(Dictionary<string, IEnterspeedProperty> data, Page page, string culture)
     {
     }
 }
