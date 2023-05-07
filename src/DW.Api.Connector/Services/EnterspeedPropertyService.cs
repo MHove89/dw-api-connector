@@ -17,7 +17,10 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", page.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", page.UpdatedDate.ToEnterspeedFormatString()),
         };
-       
+
+        
+        MapAdditionalMediaProperties(metaData, page, page.Culture);
+
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
@@ -30,7 +33,8 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
             ["createDate"] = new StringEnterspeedProperty("createDate", paragraph.CreatedDate.ToEnterspeedFormatString()),
             ["updateDate"] = new StringEnterspeedProperty("updateDate", paragraph.UpdatedDate.ToEnterspeedFormatString()),
         };
-        
+
+
         return new ObjectEnterspeedProperty("metaData", metaData);
     }
 
@@ -38,7 +42,7 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
     {
         var output = new Dictionary<string, IEnterspeedProperty>();
         var metaData = CreateMetaData(page);
-     
+
         output.Add("metaData", metaData);
 
         if (page.Item?.Fields != null)
@@ -171,5 +175,15 @@ public class EnterspeedPropertyService : IEnterspeedPropertyService
         }
 
         return new StringEnterspeedProperty("");
+    }
+
+    /// <summary>
+    /// Override to add extra meta properties on pages
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="page"></param>
+    /// <param name="culture"></param>
+    protected virtual void MapAdditionalMediaProperties(Dictionary<string, IEnterspeedProperty> data, Page page, string culture)
+    {
     }
 }
