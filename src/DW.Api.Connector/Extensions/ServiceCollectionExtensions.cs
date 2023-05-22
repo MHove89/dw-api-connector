@@ -13,6 +13,7 @@ using Enterspeed.Source.Sdk.Domain.SystemTextJson;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -50,7 +51,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEnterspeedConfigurationService, EnterspeedConfigurationService>();
         services.AddSingleton<IEnterspeedConnection, EnterspeedConnection>();
         services.AddSingleton<IJsonSerializer, SystemTextJsonSerializer>();
-        services.AddTransient<IEnterspeedPropertyService, EnterspeedPropertyService>();
         services.AddSingleton(GetSettings(services));
         services.AddTransient<IDWClient, DWClient>();
 
@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
                 return connectionProvider;
             });
 
+        services.AddTransient<IEnterspeedPropertyService, CustomPropertyService>();
         return services;
     }
 

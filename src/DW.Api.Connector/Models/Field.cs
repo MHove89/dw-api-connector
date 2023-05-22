@@ -4,7 +4,7 @@ namespace DW.Api.Connector.Models;
 
 public class Field
 {
-    [JsonPropertyName("Name")]
+    [JsonPropertyName("Name")]  
     public string Name { get; set; }
 
     [JsonPropertyName("SystemName")]

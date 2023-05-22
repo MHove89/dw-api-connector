@@ -58,6 +58,28 @@ public class IngestPagesCommmand : Command
             var castedPages = pages.Cast<Page>().ToList();
             await AddParagraphsToPages(castedPages);
 
+            var horizontWrapper = new Page()
+            {
+                CreatedDate = DateTime.UtcNow,
+                Culture = "da-DK",
+                ID = 0,
+                AreaID = 32,
+                Description = "wrapper for Horisont news",
+                Name = "Wrapper for Horisont news",
+                UpdatedDate = DateTime.UtcNow,
+                Title = "Wrapper for Horisont news",
+                Item = new Item()
+                {
+                    Id = "0",
+                    Fields = new List<Field>(),
+                    Link = "",
+                    PageID = 32,
+                    SystemName = "horizontArticlesWrapper"
+                }
+            };
+
+            castedPages.Add(horizontWrapper);
+
             foreach (var page in castedPages)
             {
                 page.Culture = Culture;
